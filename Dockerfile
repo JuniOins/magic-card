@@ -24,18 +24,12 @@ COPY . .
 # Installer les dépendances PHP
 RUN composer install --no-dev --optimize-autoloader
 
-# Copier .env.example en .env si le fichier .env n'existe pas
-RUN if [ ! -f .env ]; then cp .env.example .env; fi
-
-# Générer la clé d'application
-RUN php artisan key:generate
-
 # Donner les droits sur storage et bootstrap/cache
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Exposer le port 8000
+# Exposer le port utilisé par Laravel
 EXPOSE 8000
 
-# Commande pour démarrer Laravel
-CMD php artisan serve --host=0.0.0.0 --port=8000
+# Commande pour démarrer Laravel (Render va utiliser APP_KEY défini dans les env)
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000
